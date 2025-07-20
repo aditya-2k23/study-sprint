@@ -1,6 +1,10 @@
+"use client";
+
 import Link from "next/link";
+import { useAuth } from "@/context/AuthContext";
 
 export default function Hero() {
+  const { currentUser, loading } = useAuth();
   return (
     <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16">
       <div className="text-center">
@@ -16,12 +20,21 @@ export default function Hero() {
           Study together, stay accountable, and achieve more.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Link
-            href="/signup"
-            className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-full text-lg font-semibold hover:shadow-xl transition-shadow"
-          >
-            Start Studying Together
-          </Link>
+          {!loading && currentUser ? (
+            <Link
+              href="/dashboard"
+              className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-full text-lg font-semibold hover:shadow-xl transition-shadow"
+            >
+              Go to Dashboard
+            </Link>
+          ) : (
+            <Link
+              href="/signup"
+              className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-full text-lg font-semibold hover:shadow-xl transition-shadow"
+            >
+              Start Studying Together
+            </Link>
+          )}
           <Link
             href="#features"
             className="bg-white text-gray-800 px-8 py-4 rounded-full text-lg font-semibold border-2 border-gray-200 hover:border-gray-300 transition-colors"
