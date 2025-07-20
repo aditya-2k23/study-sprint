@@ -5,17 +5,6 @@ import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { StudyGroup, Message } from "@/types";
 import { doc, getDoc, Timestamp } from "firebase/firestore";
-
-interface StudySession {
-  sessionId: string;
-  title: string;
-  description: string;
-  scheduledTime: Date;
-  duration: number; // in minutes
-  createdBy: string;
-  createdAt: Date;
-  isActive: boolean;
-}
 import { db } from "@/firebase";
 import { formatDate } from "@/utils";
 import { sendMessage, subscribeToGroupMessages } from "@/firebase/messages";
@@ -24,6 +13,11 @@ import {
   removeTypingStatus,
   subscribeToTypingStatus,
 } from "@/firebase/typing";
+import {
+  createSession,
+  subscribeToGroupSessions,
+  StudySession,
+} from "@/firebase/sessions";
 
 const GroupPage = () => {
   const { id } = useParams();
@@ -75,9 +69,18 @@ const GroupPage = () => {
       }
     );
 
+    // Subscribe to sessions
+    const unsubscribeSessions = subscribeToGroupSessions(
+      group.groupId,
+      (groupSessions) => {
+        setSessions(groupSessions);
+      }
+    );
+
     return () => {
       unsubscribeMessages();
       unsubscribeTyping();
+      unsubscribeSessions();
     };
   }, [group, currentUser]);
 
@@ -98,15 +101,6 @@ const GroupPage = () => {
       }
     };
   }, [group, currentUser, isTyping]);
-
-  useEffect(() => {
-    // Check session status every minute
-    const interval = setInterval(() => {
-      setSessions((prevSessions) => [...prevSessions]); // Force re-render to update session status
-    }, 60000);
-
-    return () => clearInterval(interval);
-  }, []);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -167,19 +161,14 @@ const GroupPage = () => {
         return;
       }
 
-      const newSession: StudySession = {
-        sessionId: `session_${Date.now()}`,
+      // Save session to Firebase
+      await createSession(group.groupId, {
         title: sessionForm.title,
         description: sessionForm.description,
         scheduledTime: scheduledDateTime,
         duration: sessionForm.duration,
         createdBy: currentUser.uid,
-        createdAt: new Date(),
-        isActive: false,
-      };
-
-      // Add to local state (in a real app, this would be saved to Firebase)
-      setSessions((prev) => [...prev, newSession]);
+      });
 
       // Reset form and close modal
       setSessionForm({
@@ -190,8 +179,6 @@ const GroupPage = () => {
         duration: 60,
       });
       setShowScheduleModal(false);
-
-      alert("Session scheduled successfully!");
     } catch (error) {
       console.error("Error scheduling session:", error);
       alert("Failed to schedule session. Please try again.");
@@ -204,7 +191,7 @@ const GroupPage = () => {
 
   const isSessionActive = (session: StudySession) => {
     const now = new Date();
-    const sessionStart = new Date(session.scheduledTime);
+    const sessionStart = session.scheduledTime.toDate();
     const sessionEnd = new Date(
       sessionStart.getTime() + session.duration * 60000
     );
@@ -214,14 +201,15 @@ const GroupPage = () => {
 
   const isSessionUpcoming = (session: StudySession) => {
     const now = new Date();
-    const sessionStart = new Date(session.scheduledTime);
+    const sessionStart = session.scheduledTime.toDate();
     const timeDiff = sessionStart.getTime() - now.getTime();
 
     // Session is upcoming if it starts within 15 minutes
     return timeDiff > 0 && timeDiff <= 15 * 60 * 1000;
   };
 
-  const formatSessionTime = (date: Date) => {
+  const formatSessionTime = (timestamp: Timestamp) => {
+    const date = timestamp.toDate();
     return new Intl.DateTimeFormat("en-US", {
       weekday: "short",
       month: "short",
@@ -698,8 +686,14 @@ const GroupPage = () => {
 
       {/* Schedule Session Modal */}
       {showScheduleModal && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 p-4 backdrop-blur-sm drop-shadow-2xl border-t-2 border-gray-400">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+        <div
+          className="fixed inset-0 flex items-center justify-center z-50 p-4 backdrop-blur-sm drop-shadow-2xl border-t-2 border-gray-400"
+          onClick={() => setShowScheduleModal(false)}
+        >
+          <div
+            className="bg-white rounded-lg p-6 w-full max-w-md"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold text-gray-900">
                 Schedule Study Session
