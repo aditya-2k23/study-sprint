@@ -21,7 +21,7 @@ export default function FeatureCard({
   };
 
   return (
-    <div className="bg-gray-50 rounded-xl p-6 hover:shadow-lg transition-shadow">
+    <div className="bg-gray-50 rounded-xl p-6 shadow-md hover:shadow-lg transition-shadow">
       <div
         className={`${
           colorClasses[color as keyof typeof colorClasses]

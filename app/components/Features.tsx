@@ -2,9 +2,9 @@ import FeatureCard from "./FeatureCard";
 
 const features = [
   {
-    title: "Micro Study Groups",
+    title: "Study Groups",
     description:
-      "Form small, focused groups of 3-5 members for better collaboration",
+      "Form small, focused groups of 3-5 members or up to 50 members for better collaboration",
     color: "blue",
     icon: (
       <svg
@@ -127,7 +127,7 @@ const features = [
 
 export default function Features() {
   return (
-    <section id="features" className="py-20 bg-white">
+    <section id="features" className="py-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="text-4xl font-bold text-gray-900 mb-4">
@@ -139,13 +139,13 @@ export default function Features() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {features.map((feature, index) => (
+          {features.map(({ title, description, color, icon }, index) => (
             <FeatureCard
               key={index}
-              title={feature.title}
-              description={feature.description}
-              color={feature.color}
-              icon={feature.icon}
+              title={title}
+              description={description}
+              color={color}
+              icon={icon}
             />
           ))}
         </div>
