@@ -8,6 +8,8 @@ import {
   onSnapshot,
   Unsubscribe,
   limit,
+  deleteDoc,
+  doc,
 } from "firebase/firestore";
 import { db } from "@/firebase";
 import { Message } from "@/types";
@@ -104,6 +106,23 @@ export const getUnreadMessagesCount = async (
     return querySnapshot.size;
   } catch (error) {
     console.error("Error getting unread messages count:", error);
+    throw error;
+  }
+};
+
+// Delete all messages for a study group
+export const deleteGroupMessages = async (groupId: string): Promise<void> => {
+  try {
+    const messagesRef = collection(db, "studyGroups", groupId, "messages");
+    const querySnapshot = await getDocs(messagesRef);
+
+    const deletePromises = querySnapshot.docs.map((document) =>
+      deleteDoc(doc(db, "studyGroups", groupId, "messages", document.id))
+    );
+
+    await Promise.all(deletePromises);
+  } catch (error) {
+    console.error("Error deleting group messages:", error);
     throw error;
   }
 };

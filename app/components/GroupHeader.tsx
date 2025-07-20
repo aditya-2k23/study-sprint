@@ -9,6 +9,8 @@ interface GroupHeaderProps {
   isCreator: boolean;
   onLeaveGroup: () => void;
   onDeleteGroup: () => void;
+  leavingGroup?: boolean;
+  deletingGroup?: boolean;
 }
 
 const GroupHeader = ({
@@ -16,6 +18,8 @@ const GroupHeader = ({
   isCreator,
   onLeaveGroup,
   onDeleteGroup,
+  leavingGroup = false,
+  deletingGroup = false,
 }: GroupHeaderProps) => {
   const router = useRouter();
 
@@ -40,20 +44,22 @@ const GroupHeader = ({
           {isCreator ? (
             <button
               onClick={onDeleteGroup}
-              className="px-4 py-2 text-red-600 border border-red-300 rounded-lg hover:bg-red-50 transition-colors cursor-pointer"
+              disabled={deletingGroup}
+              className="px-4 py-2 text-red-600 border border-red-300 rounded-lg hover:bg-red-50 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Delete Group
+              {deletingGroup ? "Deleting..." : "Delete Group"}
             </button>
           ) : (
             <button
               onClick={onLeaveGroup}
-              className="px-4 py-2 text-red-600 border border-red-300 rounded-lg hover:bg-red-50 transition-colors cursor-pointer"
+              disabled={leavingGroup}
+              className="px-4 py-2 text-red-600 border border-red-300 rounded-lg hover:bg-red-50 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Leave Group
+              {leavingGroup ? "Leaving..." : "Leave Group"}
             </button>
           )}
           <button
-            onClick={() => router.push("/dashboard/discover")}
+            onClick={() => router.push("/discover")}
             className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
           >
             Back to Discover

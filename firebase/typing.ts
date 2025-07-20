@@ -8,6 +8,7 @@ import {
   where,
   serverTimestamp,
   Timestamp,
+  getDocs,
 } from "firebase/firestore";
 import { db } from "../firebase";
 
@@ -100,5 +101,25 @@ export const cleanupOldTypingStatuses = async (
     console.log("Cleanup function called for group:", groupId);
   } catch (error) {
     console.error("Error cleaning up typing statuses:", error);
+  }
+};
+
+// Delete all typing statuses for a group
+export const deleteGroupTypingStatuses = async (
+  groupId: string
+): Promise<void> => {
+  try {
+    const typingRef = collection(db, "typing");
+    const q = query(typingRef, where("groupId", "==", groupId));
+    const querySnapshot = await getDocs(q);
+
+    const deletePromises = querySnapshot.docs.map((document) =>
+      deleteDoc(doc(db, "typing", document.id))
+    );
+
+    await Promise.all(deletePromises);
+  } catch (error) {
+    console.error("Error deleting group typing statuses:", error);
+    throw error;
   }
 };

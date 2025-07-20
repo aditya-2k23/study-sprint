@@ -33,7 +33,7 @@ export default function Navbar() {
                   Dashboard
                 </Link>
                 <Link
-                  href="/profile"
+                  href="/dashboard/profile"
                   className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-full font-semibold hover:shadow-lg transition-shadow"
                 >
                   Profile
@@ -106,7 +106,7 @@ export default function Navbar() {
                     Dashboard
                   </Link>
                   <Link
-                    href="/profile"
+                    href="/dashboard/profile"
                     className="block text-center bg-gradient-to-r from-blue-600 to-purple-600 text-white px-3 py-2 rounded-full font-medium hover:shadow-lg transition-shadow mx-3"
                     onClick={() => setIsMenuOpen(false)}
                   >

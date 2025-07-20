@@ -7,6 +7,9 @@ import {
   onSnapshot,
   serverTimestamp,
   Timestamp,
+  getDocs,
+  deleteDoc,
+  doc,
 } from "firebase/firestore";
 import { db } from "../firebase";
 
@@ -89,5 +92,23 @@ export const subscribeToGroupSessions = (
   } catch (error) {
     console.error("Error subscribing to sessions:", error);
     return () => {};
+  }
+};
+
+// Delete all sessions for a study group
+export const deleteGroupSessions = async (groupId: string): Promise<void> => {
+  try {
+    const sessionsRef = collection(db, "sessions");
+    const q = query(sessionsRef, where("groupId", "==", groupId));
+    const querySnapshot = await getDocs(q);
+
+    const deletePromises = querySnapshot.docs.map((document) =>
+      deleteDoc(doc(db, "sessions", document.id))
+    );
+
+    await Promise.all(deletePromises);
+  } catch (error) {
+    console.error("Error deleting group sessions:", error);
+    throw error;
   }
 };

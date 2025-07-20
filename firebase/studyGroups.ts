@@ -2,6 +2,7 @@ import {
   doc,
   getDoc,
   updateDoc,
+  deleteDoc,
   collection,
   query,
   where,
@@ -14,6 +15,9 @@ import {
 import { db } from "@/firebase";
 import { StudyGroup, StudyGroupWithMembers } from "@/types";
 import { getUserProfile } from "./users";
+import { deleteGroupMessages } from "./messages";
+import { deleteGroupSessions } from "./sessions";
+import { deleteGroupTypingStatuses } from "./typing";
 
 // Create a new study group
 export const createStudyGroup = async (
@@ -199,6 +203,34 @@ export const updateStudyGroup = async (
     });
   } catch (error) {
     console.error("Error updating study group:", error);
+    throw error;
+  }
+};
+
+// Delete a study group
+export const deleteStudyGroup = async (
+  groupId: string,
+  userId: string
+): Promise<void> => {
+  try {
+    // First verify that the user is the creator of the group
+    const group = await getStudyGroup(groupId);
+    if (!group) throw new Error("Study group not found");
+    if (group.creatorId !== userId)
+      throw new Error("Only the creator can delete this group");
+
+    // Delete all related data in parallel
+    await Promise.all([
+      deleteGroupMessages(groupId),
+      deleteGroupSessions(groupId),
+      deleteGroupTypingStatuses(groupId),
+    ]);
+
+    // Finally delete the group document
+    const groupRef = doc(db, "studyGroups", groupId);
+    await deleteDoc(groupRef);
+  } catch (error) {
+    console.error("Error deleting study group:", error);
     throw error;
   }
 };

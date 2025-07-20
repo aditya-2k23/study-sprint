@@ -13,9 +13,11 @@ import {
   subscribeToTypingStatus,
 } from "@/firebase/typing";
 import { subscribeToGroupSessions, StudySession } from "@/firebase/sessions";
+import { deleteStudyGroup, leaveStudyGroup } from "@/firebase/studyGroups";
 import GroupHeader from "@/app/components/GroupHeader";
 import SessionManager from "@/app/components/SessionManager";
 import Chat from "@/app/components/Chat";
+import DashboardNav from "@/app/components/DashboardNav";
 
 const GroupPage = () => {
   const { id } = useParams();
@@ -30,6 +32,8 @@ const GroupPage = () => {
   const [typingUsers, setTypingUsers] = useState<string[]>([]);
   const [isTyping, setIsTyping] = useState(false);
   const [sessions, setSessions] = useState<StudySession[]>([]);
+  const [deletingGroup, setDeletingGroup] = useState(false);
+  const [leavingGroup, setLeavingGroup] = useState(false);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const loadGroup = useCallback(async () => {
@@ -157,36 +161,71 @@ const GroupPage = () => {
   };
 
   const handleLeaveGroup = async () => {
-    if (!group || !currentUser) return;
+    if (!group || !currentUser || leavingGroup) return;
 
     const confirmed = window.confirm(
       "Are you sure you want to leave this group?"
     );
     if (!confirmed) return;
 
+    setLeavingGroup(true);
     try {
-      // TODO: Implement leave group functionality
-      alert("Leave group functionality to be implemented");
+      await leaveStudyGroup(group.groupId, currentUser.uid);
+
+      // Show success message and redirect to dashboard
+      alert("You have left the group successfully!");
+      router.push("/dashboard");
     } catch (error) {
       console.error("Error leaving group:", error);
-      alert("Failed to leave group. Please try again.");
+
+      // Show user-friendly error message
+      if (error instanceof Error) {
+        alert(`Failed to leave group: ${error.message}`);
+      } else {
+        alert("Failed to leave group. Please try again.");
+      }
+    } finally {
+      setLeavingGroup(false);
     }
   };
 
   const handleDeleteGroup = async () => {
-    if (!group || !currentUser || group.creatorId !== currentUser.uid) return;
+    if (
+      !group ||
+      !currentUser ||
+      group.creatorId !== currentUser.uid ||
+      deletingGroup
+    )
+      return;
 
     const confirmed = window.confirm(
       "Are you sure you want to delete this group? This action cannot be undone and will remove the group for all members."
     );
     if (!confirmed) return;
 
+    const finalConfirmed = window.confirm(
+      "This will permanently delete the group, all messages, sessions, and related data. This action is irreversible. Are you absolutely sure?"
+    );
+    if (!finalConfirmed) return;
+
+    setDeletingGroup(true);
     try {
-      // TODO: Implement delete group functionality
-      alert("Delete group functionality to be implemented");
+      await deleteStudyGroup(group.groupId, currentUser.uid);
+
+      // Show success message and redirect to dashboard
+      alert("Group deleted successfully!");
+      router.push("/dashboard");
     } catch (error) {
       console.error("Error deleting group:", error);
-      alert("Failed to delete group. Please try again.");
+
+      // Show user-friendly error message
+      if (error instanceof Error) {
+        alert(`Failed to delete group: ${error.message}`);
+      } else {
+        alert("Failed to delete group. Please try again.");
+      }
+    } finally {
+      setDeletingGroup(false);
     }
   };
 
@@ -294,30 +333,35 @@ const GroupPage = () => {
   const isCreator = group.creatorId === currentUser?.uid;
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <GroupHeader
-        group={group}
-        isCreator={isCreator}
-        onLeaveGroup={handleLeaveGroup}
-        onDeleteGroup={handleDeleteGroup}
-      />
+    <>
+      <DashboardNav />
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <GroupHeader
+          group={group}
+          isCreator={isCreator}
+          onLeaveGroup={handleLeaveGroup}
+          onDeleteGroup={handleDeleteGroup}
+          leavingGroup={leavingGroup}
+          deletingGroup={deletingGroup}
+        />
 
-      <SessionManager
-        groupId={group.groupId}
-        currentUserId={currentUser?.uid || ""}
-        sessions={sessions}
-      />
+        <SessionManager
+          groupId={group.groupId}
+          currentUserId={currentUser?.uid || ""}
+          sessions={sessions}
+        />
 
-      <Chat
-        messages={messages}
-        currentUserId={currentUser?.uid || ""}
-        newMessage={newMessage}
-        onSendMessage={handleSendMessage}
-        onMessageInputChange={handleMessageInputChange}
-        sendingMessage={sendingMessage}
-        typingUsers={typingUsers}
-      />
-    </div>
+        <Chat
+          messages={messages}
+          currentUserId={currentUser?.uid || ""}
+          newMessage={newMessage}
+          onSendMessage={handleSendMessage}
+          onMessageInputChange={handleMessageInputChange}
+          sendingMessage={sendingMessage}
+          typingUsers={typingUsers}
+        />
+      </div>
+    </>
   );
 };
 

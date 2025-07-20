@@ -6,6 +6,7 @@ import {
   collection,
   query,
   getDocs,
+  deleteDoc,
 } from "firebase/firestore";
 import { db } from "@/firebase";
 import { User } from "@/types";
@@ -89,6 +90,17 @@ export const getUsersByExamTimeline = async (
     return users;
   } catch (error) {
     console.error("Error getting users by exam timeline:", error);
+    throw error;
+  }
+};
+
+// Delete user profile
+export const deleteUserProfile = async (uid: string): Promise<void> => {
+  try {
+    const userRef = doc(db, "users", uid);
+    await deleteDoc(userRef);
+  } catch (error) {
+    console.error("Error deleting user profile:", error);
     throw error;
   }
 };
