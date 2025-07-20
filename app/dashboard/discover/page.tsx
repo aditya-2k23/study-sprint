@@ -1,12 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { getActiveStudyGroups, joinStudyGroup } from "@/firebase/studyGroups";
 import { useAuth } from "@/context/AuthContext";
 import { StudyGroup } from "@/types";
+import { formatDate } from "@/utils";
 
 const DiscoverPage = () => {
   const { currentUser } = useAuth();
+  const router = useRouter();
   const [groups, setGroups] = useState<StudyGroup[]>([]);
   const [filteredGroups, setFilteredGroups] = useState<StudyGroup[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -29,7 +32,6 @@ const DiscoverPage = () => {
 
   useEffect(() => {
     loadGroups();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -40,11 +42,8 @@ const DiscoverPage = () => {
   const loadGroups = async (): Promise<void> => {
     try {
       const activeGroups = await getActiveStudyGroups();
-      // Filter out groups the user is already a member of
-      const availableGroups = activeGroups.filter(
-        (group) => !group.members.includes(currentUser?.uid ?? "")
-      );
-      setGroups(availableGroups);
+      // Show all groups, even those the user is already a member of
+      setGroups(activeGroups);
       setLoading(false);
     } catch (error) {
       console.error("Error loading groups:", error);
@@ -79,8 +78,7 @@ const DiscoverPage = () => {
     setJoining(groupId);
     try {
       await joinStudyGroup(groupId, currentUser.uid);
-      // Remove the group from the list since user joined
-      setGroups((prev) => prev.filter((group) => group.groupId !== groupId));
+      router.push(`/group/${groupId}`);
     } catch (error) {
       console.error("Error joining group:", error);
       alert("Failed to join group. Please try again.");
@@ -93,7 +91,7 @@ const DiscoverPage = () => {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading study groups...</p>
         </div>
       </div>
@@ -126,7 +124,7 @@ const DiscoverPage = () => {
               id="search"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               placeholder="Search by name, subject, or topics..."
             />
           </div>
@@ -141,7 +139,7 @@ const DiscoverPage = () => {
               id="subject"
               value={selectedSubject}
               onChange={(e) => setSelectedSubject(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="">All Subjects</option>
               {subjects.map((subject) => (
@@ -173,7 +171,7 @@ const DiscoverPage = () => {
                   <h3 className="text-lg font-semibold text-gray-900 line-clamp-2">
                     {group.name}
                   </h3>
-                  <span className="px-2 py-1 text-xs rounded-full bg-primary/10 text-primary">
+                  <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-600">
                     {group.subject}
                   </span>
                 </div>
@@ -206,29 +204,32 @@ const DiscoverPage = () => {
                   <span>
                     {group.members.length}/{group.maxMembers} members
                   </span>
-                  <span>
-                    Created {new Date(group.createdAt).toLocaleDateString()}
-                  </span>
+                  <span>Created {formatDate(group.createdAt)}</span>
                 </div>
 
                 <button
                   onClick={() => handleJoinGroup(group.groupId)}
                   disabled={
                     joining === group.groupId ||
-                    group.members.length >= group.maxMembers
+                    group.members.length >= group.maxMembers ||
+                    group.members.includes(currentUser?.uid ?? "")
                   }
                   className={`w-full py-2 px-4 rounded-lg font-medium transition-all ${
                     group.members.length >= group.maxMembers
                       ? "bg-gray-100 text-gray-400 cursor-not-allowed"
                       : joining === group.groupId
-                      ? "bg-primary/70 text-white cursor-not-allowed"
-                      : "bg-primary hover:opacity-90 text-white"
+                      ? "bg-blue-400 text-white cursor-not-allowed"
+                      : group.members.includes(currentUser?.uid ?? "")
+                      ? "bg-blue-100 text-blue-400 font-semibold cursor-not-allowed"
+                      : "bg-gradient-to-r from-blue-600 to-purple-600 hover:shadow-lg text-white cursor-pointer"
                   }`}
                 >
                   {group.members.length >= group.maxMembers
                     ? "Group Full"
                     : joining === group.groupId
                     ? "Joining..."
+                    : group.members.includes(currentUser?.uid ?? "")
+                    ? "Already a Member"
                     : "Join Group"}
                 </button>
               </div>
@@ -259,7 +260,7 @@ const DiscoverPage = () => {
               : "No study groups are currently available. Why not create one?"}
           </p>
           {!searchTerm && !selectedSubject && (
-            <button className="bg-primary hover:opacity-90 text-white px-6 py-2 rounded-lg font-medium transition-all">
+            <button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:shadow-lg text-white px-6 py-2 rounded-lg font-medium transition-all cursor-pointer">
               Create Group
             </button>
           )}

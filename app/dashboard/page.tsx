@@ -5,6 +5,7 @@ import { getUserStudyGroups } from "@/firebase/studyGroups";
 import { useAuth } from "@/context/AuthContext";
 import Link from "next/link";
 import { StudyGroup } from "@/types";
+import { formatDate } from "@/utils";
 
 const Dashboard = () => {
   const { currentUser } = useAuth();
@@ -180,7 +181,7 @@ const Dashboard = () => {
             {groups.slice(0, 6).map((group: StudyGroup) => (
               <Link
                 key={group.groupId}
-                href={`/dashboard/groups/${group.groupId}`}
+                href={`/groups/${group.groupId}`}
                 className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border border-gray-100"
               >
                 <div className="flex items-start justify-between mb-3">
@@ -203,7 +204,7 @@ const Dashboard = () => {
                   <span>
                     {group.members.length}/{group.maxMembers} members
                   </span>
-                  <span>{new Date(group.createdAt).toLocaleDateString()}</span>
+                  <span>{formatDate(group.createdAt)}</span>
                 </div>
               </Link>
             ))}
