@@ -64,7 +64,7 @@ export default function Navbar() {
             <ThemeSwitcher />
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="text-fg hover:text-primary p-2 rounded-md transition-colors dark:text-fg-dark dark:hover:text-primary"
+              className="text-gray-700 hover:text-blue-600 p-2 rounded-md transition-colors dark:text-gray-300 dark:hover:text-blue-400"
               aria-label="Toggle menu"
             >
               <svg
@@ -97,20 +97,20 @@ export default function Navbar() {
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="md:hidden border-t border-primary/20 dark:border-gray-600">
+          <div className="md:hidden border-t border-gray-200 dark:border-gray-600">
             <div className="px-2 pt-2 pb-3 space-y-1">
               {!loading && currentUser ? (
                 <>
                   <Link
                     href="/dashboard"
-                    className="block text-fg hover:text-primary hover:bg-primary/10 px-3 py-2 rounded-md font-semibold transition-colors dark:text-fg-dark dark:hover:text-primary dark:hover:bg-primary/20"
+                    className="block text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-md font-semibold transition-colors dark:text-gray-300 dark:hover:text-blue-400 dark:hover:bg-blue-900/20"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Dashboard
                   </Link>
                   <Link
                     href="/profile"
-                    className="block text-center bg-gradient-to-r from-primary to-secondary text-white px-4 py-2 rounded-full font-medium hover:shadow-lg transition-shadow mx-3"
+                    className="block text-center bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-full font-medium hover:shadow-lg transition-shadow mx-3"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Profile
@@ -120,14 +120,14 @@ export default function Navbar() {
                 <>
                   <Link
                     href="/login"
-                    className="block text-fg hover:text-primary hover:bg-primary/10 px-3 py-2 rounded-md font-semibold transition-colors dark:text-fg-dark dark:hover:text-primary dark:hover:bg-primary/20"
+                    className="block text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-md font-semibold transition-colors dark:text-gray-300 dark:hover:text-blue-400 dark:hover:bg-blue-900/20"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Login
                   </Link>
                   <Link
                     href="/signup"
-                    className="block text-center bg-gradient-to-r from-primary to-secondary text-white px-4 py-2 rounded-full font-medium hover:shadow-lg transition-shadow mx-3"
+                    className="block text-center bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-full font-medium hover:shadow-lg transition-shadow mx-3"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Get Started

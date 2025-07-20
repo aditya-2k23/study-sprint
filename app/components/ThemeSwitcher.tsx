@@ -34,7 +34,7 @@ export default function ThemeSwitcher() {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-2 rounded-md text-fg hover:bg-primary/10 transition-colors dark:text-fg-dark dark:hover:bg-primary/20"
+        className="flex items-center gap-2 px-3 py-2 rounded-md text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors dark:text-gray-300 dark:hover:bg-blue-900/20 dark:hover:text-blue-400"
         aria-label="Change theme"
       >
         <span className="text-lg">{currentTheme.icon}</span>
@@ -57,7 +57,7 @@ export default function ThemeSwitcher() {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-48 bg-bg border border-primary/20 rounded-md shadow-lg z-50 dark:bg-gray-800 dark:border-gray-600">
+        <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg z-50 dark:bg-gray-800 dark:border-gray-600">
           {themes.map((themeOption) => (
             <button
               key={themeOption.value}
@@ -65,10 +65,10 @@ export default function ThemeSwitcher() {
                 setTheme(themeOption.value);
                 setIsOpen(false);
               }}
-              className={`w-full flex items-center gap-3 px-4 py-2 text-left hover:bg-primary/10 transition-colors dark:hover:bg-primary/20 ${
+              className={`w-full flex items-center gap-3 px-4 py-2 text-left hover:bg-blue-50 transition-colors dark:hover:bg-blue-900/20 ${
                 theme === themeOption.value
-                  ? "bg-primary/20 text-primary dark:bg-primary/30"
-                  : "text-fg dark:text-fg-dark"
+                  ? "bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400"
+                  : "text-gray-700 dark:text-gray-300"
               }`}
             >
               <span className="text-lg">{themeOption.icon}</span>
