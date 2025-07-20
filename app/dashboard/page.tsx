@@ -1,30 +1,31 @@
 "use client";
 
 import { useEffect, useState } from "react";
-// import { getUserStudyGroups } from '../../lib/firebase/studyGroups';
+import { getUserStudyGroups } from "@/firebase/studyGroups";
 import { useAuth } from "@/context/AuthContext";
 import Link from "next/link";
+import { StudyGroup } from "@/types";
 
-export default function DashboardPage() {
+const Dashboard = () => {
   const { currentUser } = useAuth();
-  const [groups, setGroups] = useState([]);
+  const [groups, setGroups] = useState<StudyGroup[]>([]);
 
-  // useEffect(() => {
-  //   if (currentUser) {
-  //     loadGroups();
-  //   }
-  // }, [currentUser]);
+  useEffect(() => {
+    const loadGroups = async () => {
+      if (!currentUser) return;
 
-  // const loadGroups = async () => {
-  //   if (!currentUser) return;
+      try {
+        const userGroups = await getUserStudyGroups(currentUser.uid);
+        setGroups(userGroups);
+      } catch (error) {
+        console.error("Error loading user groups:", error);
+      }
+    };
 
-  //   try {
-  //     const userGroups = await getUserStudyGroups(currentUser.uid);
-  //     setGroups(userGroups);
-  //   } catch (error) {
-  //     console.error("Error loading user groups:", error);
-  //   }
-  // };
+    if (currentUser) {
+      loadGroups();
+    }
+  }, [currentUser]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -174,9 +175,9 @@ export default function DashboardPage() {
           </Link>
         </div>
 
-        {/* {groups.length > 0 ? (
+        {groups.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {groups.slice(0, 6).map((group) => (
+            {groups.slice(0, 6).map((group: StudyGroup) => (
               <Link
                 key={group.groupId}
                 href={`/dashboard/groups/${group.groupId}`}
@@ -244,8 +245,10 @@ export default function DashboardPage() {
               </Link>
             </div>
           </div>
-        )} */}
+        )}
       </section>
     </div>
   );
-}
+};
+
+export default Dashboard;

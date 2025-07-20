@@ -9,6 +9,7 @@ import {
   addDoc,
   arrayUnion,
   arrayRemove,
+  Timestamp,
 } from "firebase/firestore";
 import { db } from "@/firebase";
 import { StudyGroup, StudyGroupWithMembers } from "@/types";
@@ -22,8 +23,8 @@ export const createStudyGroup = async (
     const studyGroupsRef = collection(db, "studyGroups");
     const docRef = await addDoc(studyGroupsRef, {
       ...groupData,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: Timestamp.now(),
+      updatedAt: Timestamp.now(),
     });
 
     // Update the document with its ID
@@ -160,7 +161,7 @@ export const joinStudyGroup = async (
 
     await updateDoc(groupRef, {
       members: arrayUnion(userId),
-      updatedAt: new Date(),
+      updatedAt: Timestamp.now(),
     });
   } catch (error) {
     console.error("Error joining study group:", error);
@@ -177,7 +178,7 @@ export const leaveStudyGroup = async (
     const groupRef = doc(db, "studyGroups", groupId);
     await updateDoc(groupRef, {
       members: arrayRemove(userId),
-      updatedAt: new Date(),
+      updatedAt: Timestamp.now(),
     });
   } catch (error) {
     console.error("Error leaving study group:", error);
@@ -194,7 +195,7 @@ export const updateStudyGroup = async (
     const groupRef = doc(db, "studyGroups", groupId);
     await updateDoc(groupRef, {
       ...updates,
-      updatedAt: new Date(),
+      updatedAt: Timestamp.now(),
     });
   } catch (error) {
     console.error("Error updating study group:", error);

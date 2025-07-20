@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
-// import { signOutUser } from '@/firebase.ts';
+import { signOutUser } from "@/firebase/auth";
 import { useRouter } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
 
@@ -26,14 +26,14 @@ const DashboardNav = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isDropdownOpen]);
 
-  // const handleSignOut = async () => {
-  //   try {
-  //     await signOutUser();
-  //     router.push('/');
-  //   } catch (error) {
-  //     console.error('Error signing out:', error);
-  //   }
-  // };
+  const handleSignOut = async () => {
+    try {
+      await signOutUser();
+      router.push("/");
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
+  };
 
   return (
     <nav className="bg-white shadow-sm border-b border-gray-200">
@@ -69,7 +69,10 @@ const DashboardNav = () => {
           </div>
 
           <div className="flex items-center space-x-4">
-            <button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:shadow-lg text-white px-4 py-2 rounded-full text-sm font-medium transition-all cursor-pointer">
+            <button
+              onClick={() => router.push("/dashboard/create-group")}
+              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:shadow-lg text-white px-4 py-2 rounded-full text-sm font-medium transition-all cursor-pointer"
+            >
               Create Group
             </button>
 
@@ -111,7 +114,10 @@ const DashboardNav = () => {
                   >
                     Profile Settings
                   </Link>
-                  <button className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">
+                  <button
+                    onClick={handleSignOut}
+                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
+                  >
                     Sign Out
                   </button>
                 </div>
