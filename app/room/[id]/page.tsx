@@ -2,7 +2,15 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
+import { Message } from "@/types";
+import { sendMessage, subscribeToGroupMessages } from "@/firebase/messages";
+import {
+  setTypingStatus,
+  removeTypingStatus,
+  subscribeToTypingStatus,
+} from "@/firebase/typing";
+import Chat from "@/app/components/Chat";
 
 const RoomPage = () => {
   const { id } = useParams();
@@ -14,6 +22,12 @@ const RoomPage = () => {
     description: string;
     participants: string[];
   } | null>(null);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [newMessage, setNewMessage] = useState("");
+  const [sendingMessage, setSendingMessage] = useState(false);
+  const [typingUsers, setTypingUsers] = useState<string[]>([]);
+  const [isTyping, setIsTyping] = useState(false);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     if (!currentUser) {
@@ -29,10 +43,143 @@ const RoomPage = () => {
       description: "Live study session in progress",
       participants: [],
     });
+
+    // Subscribe to room messages using session ID as room ID
+    if (id) {
+      const unsubscribeMessages = subscribeToGroupMessages(
+        id as string,
+        (newMessages) => {
+          setMessages(newMessages);
+        }
+      );
+
+      const unsubscribeTyping = subscribeToTypingStatus(
+        id as string,
+        currentUser.uid,
+        (typingUserNames) => {
+          setTypingUsers(typingUserNames);
+        }
+      );
+
+      return () => {
+        unsubscribeMessages();
+        unsubscribeTyping();
+      };
+    }
   }, [currentUser, id, router]);
+
+  useEffect(() => {
+    // Cleanup typing timeout on unmount
+    return () => {
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+      // Also remove typing status when component unmounts
+      if (id && currentUser && isTyping) {
+        removeTypingStatus(id as string, currentUser.uid).catch(console.error);
+      }
+    };
+  }, [id, currentUser, isTyping]);
 
   const handleLeaveRoom = () => {
     router.push("/dashboard");
+  };
+
+  const handleTypingStart = async () => {
+    if (!id || !currentUser || isTyping) return;
+
+    setIsTyping(true);
+    try {
+      await setTypingStatus(
+        id as string,
+        currentUser.uid,
+        currentUser.displayName || currentUser.email || "Anonymous"
+      );
+    } catch (error) {
+      console.error("Error setting typing status:", error);
+    }
+
+    // Clear existing timeout
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+
+    // Set timeout to stop typing indicator after 3 seconds of inactivity
+    typingTimeoutRef.current = setTimeout(() => {
+      handleTypingStop();
+    }, 3000);
+  };
+
+  const handleTypingStop = async () => {
+    if (!isTyping || !id || !currentUser) return;
+
+    setIsTyping(false);
+    try {
+      await removeTypingStatus(id as string, currentUser.uid);
+    } catch (error) {
+      console.error("Error removing typing status:", error);
+    }
+
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+      typingTimeoutRef.current = null;
+    }
+  };
+
+  const handleSendMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newMessage.trim() || !id || !currentUser || sendingMessage) return;
+
+    // Immediately stop typing indicator locally
+    setIsTyping(false);
+
+    // Clear typing timeout
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+      typingTimeoutRef.current = null;
+    }
+
+    // Remove typing status from Firebase (don't wait for it)
+    if (id && currentUser) {
+      removeTypingStatus(id as string, currentUser.uid).catch(console.error);
+    }
+
+    setSendingMessage(true);
+    try {
+      await sendMessage({
+        groupId: id as string,
+        senderId: currentUser.uid,
+        senderName: currentUser.displayName || currentUser.email || "Anonymous",
+        content: newMessage.trim(),
+        isRead: false,
+      });
+      setNewMessage("");
+    } catch (error) {
+      console.error("Error sending message:", error);
+      alert("Failed to send message. Please try again.");
+    } finally {
+      setSendingMessage(false);
+    }
+  };
+
+  const handleMessageInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setNewMessage(value);
+
+    // Handle typing indicators
+    if (value.trim() && !isTyping) {
+      handleTypingStart();
+    } else if (!value.trim() && isTyping) {
+      handleTypingStop();
+    } else if (value.trim() && isTyping) {
+      // Reset the timeout if user is still typing
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+      typingTimeoutRef.current = setTimeout(() => {
+        handleTypingStop();
+      }, 3000);
+    }
   };
 
   if (!currentUser) {
@@ -167,24 +314,16 @@ const RoomPage = () => {
             </div>
 
             {/* Chat */}
-            <div className="bg-white rounded-lg shadow-md p-4">
-              <h3 className="font-semibold text-gray-900 mb-3">Session Chat</h3>
-              <div className="border border-gray-200 rounded-lg h-48 p-3 mb-3 overflow-y-auto bg-gray-50">
-                <div className="text-center text-gray-500 text-sm">
-                  <p>Session chat will appear here</p>
-                </div>
-              </div>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  placeholder="Type a message..."
-                  className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-                <button className="px-3 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg text-sm hover:shadow-lg transition-all cursor-pointer">
-                  Send
-                </button>
-              </div>
-            </div>
+            <Chat
+              messages={messages}
+              currentUserId={currentUser?.uid || ""}
+              newMessage={newMessage}
+              onSendMessage={handleSendMessage}
+              onMessageInputChange={handleMessageInputChange}
+              sendingMessage={sendingMessage}
+              typingUsers={typingUsers}
+              title="Session Chat"
+            />
           </div>
         </div>
       </div>
