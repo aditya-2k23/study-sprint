@@ -169,7 +169,7 @@ const Dashboard = () => {
             My Study Groups
           </h2>
           <Link
-            href="/dashboard/groups"
+            href="/discover"
             className="text-blue-600 hover:text-blue-800 text-sm font-medium"
           >
             View All →
