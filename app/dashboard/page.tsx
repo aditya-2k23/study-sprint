@@ -239,7 +239,7 @@ const Dashboard = () => {
                 Create Group
               </Link>
               <Link
-                href="/dashboard/discover"
+                href="/discover"
                 className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium transition-all"
               >
                 Discover Groups
