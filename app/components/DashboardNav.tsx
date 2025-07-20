@@ -37,7 +37,7 @@ const DashboardNav = () => {
 
   return (
     <nav className="bg-white shadow-sm border-b border-gray-200">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-4">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
             <Link
@@ -49,19 +49,19 @@ const DashboardNav = () => {
             <div className="ml-10 flex space-x-8">
               <Link
                 href="/dashboard"
-                className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
+                className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-semibold"
               >
                 Dashboard
               </Link>
               <Link
                 href="/dashboard/groups"
-                className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
+                className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-semibold"
               >
                 My Groups
               </Link>
               <Link
-                href="/dashboard/discover"
-                className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
+                href="/discover"
+                className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-semibold"
               >
                 Discover
               </Link>

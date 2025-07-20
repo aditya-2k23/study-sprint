@@ -46,7 +46,7 @@ export default function Hero() {
 
       {/* Hero Features */}
       <div className="mt-16 bg-white rounded-2xl shadow-md p-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8">
           <div className="text-center">
             <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
               <svg

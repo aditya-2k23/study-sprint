@@ -61,7 +61,7 @@ export default function Navbar() {
           <div className="md:hidden flex items-center gap-2">
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="text-gray-700 hover:text-blue-600 p-2 rounded-md transition-colors dark:text-gray-300 dark:hover:text-blue-400"
+              className="text-gray-700 hover:text-blue-600 p-2 rounded-md transition-colors cursor-pointer"
               aria-label="Toggle menu"
             >
               <svg
@@ -94,20 +94,20 @@ export default function Navbar() {
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="md:hidden border-t border-gray-200 dark:border-gray-600">
+          <div className="md:hidden border-t border-gray-200 dark:border-gray-600/25">
             <div className="px-2 pt-2 pb-3 space-y-1">
               {!loading && currentUser ? (
                 <>
                   <Link
                     href="/dashboard"
-                    className="block text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-3 py-2 rounded-md font-semibold transition-colors dark:text-gray-300 dark:hover:text-blue-400 dark:hover:bg-blue-900/20"
+                    className="block hover:text-blue-600 hover:bg-gray-100 px-3 py-2 rounded-md font-semibold transition-colors text-center"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Dashboard
                   </Link>
                   <Link
                     href="/profile"
-                    className="block text-center bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-full font-medium hover:shadow-lg transition-shadow mx-3"
+                    className="block text-center bg-gradient-to-r from-blue-600 to-purple-600 text-white px-3 py-2 rounded-full font-medium hover:shadow-lg transition-shadow mx-3"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Profile

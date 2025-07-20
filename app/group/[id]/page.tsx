@@ -312,7 +312,7 @@ const GroupPage = () => {
             <h3 className="text-lg font-semibold text-red-900 mb-2">Error</h3>
             <p className="text-red-700 mb-4">{error}</p>
             <button
-              onClick={() => router.push("/dashboard/discover")}
+              onClick={() => router.push("/discover")}
               className="bg-gradient-to-r from-blue-600 to-purple-600 hover:shadow-lg text-white px-6 py-2 rounded-lg font-medium transition-all cursor-pointer"
             >
               Back to Discover
