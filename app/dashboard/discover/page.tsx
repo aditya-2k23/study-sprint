@@ -260,7 +260,10 @@ const DiscoverPage = () => {
               : "No study groups are currently available. Why not create one?"}
           </p>
           {!searchTerm && !selectedSubject && (
-            <button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:shadow-lg text-white px-6 py-2 rounded-lg font-medium transition-all cursor-pointer">
+            <button
+              onClick={() => router.push("/dashboard/create-group")}
+              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:shadow-lg text-white px-6 py-2 rounded-lg font-medium transition-all cursor-pointer"
+            >
               Create Group
             </button>
           )}

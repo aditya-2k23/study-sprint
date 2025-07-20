@@ -1,18 +1,8 @@
 @import "tailwindcss";
 
-:root {
-  --background: #FDF6E3;
-  --foreground: #1E2A38;
-}
-
-.dark {
-  --background: #1E2A38;
-  --foreground: #FDF6E3;
-}
-
 body {
-  background-color: var(--background);
-  color: var(--foreground);
+  background-color: #fff;
+  color: #1E2A38;
   font-family: Arial, Helvetica, sans-serif;
   transition: background-color 0.3s ease, color 0.3s ease;
 }

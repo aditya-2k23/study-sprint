@@ -138,8 +138,8 @@ const CreateGroupPage = () => {
 
       const newGroupId = await createStudyGroup(groupData);
 
-      // Redirect to the dashboard or the new group's page
-      router.push(`/dashboard?created=${newGroupId}`);
+      // Redirect to the new group's page
+      router.push(`/group/${newGroupId}`);
     } catch (error) {
       console.error("Error creating group:", error);
       alert("Failed to create group. Please try again.");

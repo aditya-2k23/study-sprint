@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import ThemeSwitcher from "./ThemeSwitcher";
 import { useAuth } from "@/context/AuthContext";
 
 export default function Navbar() {
@@ -25,7 +24,6 @@ export default function Navbar() {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-4">
-            {/* <ThemeSwitcher /> */}
             {!loading && currentUser ? (
               <>
                 <Link
@@ -61,7 +59,6 @@ export default function Navbar() {
 
           {/* Mobile Hamburger Button */}
           <div className="md:hidden flex items-center gap-2">
-            <ThemeSwitcher />
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="text-gray-700 hover:text-blue-600 p-2 rounded-md transition-colors dark:text-gray-300 dark:hover:text-blue-400"

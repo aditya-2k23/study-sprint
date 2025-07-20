@@ -181,7 +181,7 @@ const Dashboard = () => {
             {groups.slice(0, 6).map((group: StudyGroup) => (
               <Link
                 key={group.groupId}
-                href={`/groups/${group.groupId}`}
+                href={`/group/${group.groupId}`}
                 className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border border-gray-100"
               >
                 <div className="flex items-start justify-between mb-3">
